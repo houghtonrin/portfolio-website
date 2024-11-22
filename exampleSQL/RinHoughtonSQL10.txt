@@ -1,0 +1,175 @@
+set pagesize 5000
+
+/*1*/
+INSERT INTO professors
+(professorID, firstname, lastname, streetaddress, city, state, zip, phone, hireDate)
+VALUES
+(9999, 'Waldo', 'Wildcat', '1234 Stewart Stadium Way', 'Ogden', 'UT', '84408', NULL, sysdate);
+
+SAVEPOINT Problem1;
+
+/*2*/
+INSERT INTO sections 
+(sectionID, courseID, sectionStartDate, locationID, professorID, capacity, Semester)
+VALUES
+(12345, 10521, To_Date('Jan 11 2023 9:30 AM', 'Mon DD YYYY HH:MI AM'), 8194, 9999, 30, 'Spr2023');
+
+SAVEPOINT Problem2;
+
+/*3*/
+--Murray Gandy
+INSERT INTO registration
+(studentid, sectionid, registrationdate, finalClassGrade)
+VALUES
+(2551, 12345, sysdate, NULL);
+
+--Maxima Winterhollar
+INSERT INTO registration
+(studentid, sectionid, registrationdate, finalClassGrade)
+VALUES
+(1664, 12345, sysdate, NULL);
+
+--Parker Volstad
+INSERT INTO registration
+(studentid, sectionid, registrationdate, finalClassGrade)
+VALUES
+(4252, 12345, sysdate, NULL);
+
+--Tai Pizani
+INSERT INTO registration
+(studentid, sectionid, registrationdate, finalClassGrade)
+VALUES
+(3564, 12345, sysdate, NULL);
+
+--Dominga Fiscus
+INSERT INTO registration
+(studentid, sectionid, registrationdate, finalClassGrade)
+VALUES
+(2474, 12345, sysdate, NULL);
+
+--Chloe Sperka
+INSERT INTO registration
+(studentid, sectionid, registrationdate, finalClassGrade)
+VALUES
+(3954, 12345, sysdate, NULL);
+
+--Scott Rupert
+INSERT INTO registration
+(studentid, sectionid, registrationdate, finalClassGrade)
+VALUES
+(3743, 12345, sysdate, NULL);
+
+--Keli Burtman
+INSERT INTO registration
+(studentid, sectionid, registrationdate, finalClassGrade)
+VALUES
+(2024, 12345, sysdate, NULL);
+
+SAVEPOINT Problem3;
+
+/*4*/
+INSERT INTO registration
+(studentid, sectionid, registrationdate, finalClassGrade)
+(SELECT studentid, 12345, sysdate, NULL
+FROM students
+WHERE city = 'Aberdeen'
+AND state = 'ID');
+
+SAVEPOINT Problem4;
+
+/*5*/
+UPDATE professors
+SET phone = 8016267025
+WHERE professorid = 9999;
+
+SAVEPOINT Problem5;
+
+/*6*/
+UPDATE students
+SET tuitionbalance = 0
+WHERE city = 'Cody'
+AND state = 'WY';
+
+SAVEPOINT Problem6;
+
+/*7*/
+UPDATE sections
+SET capacity = 50
+WHERE courseid = 10521;
+
+SAVEPOINT Problem7;
+
+/*8*/
+SELECT firstname, lastname, NVL(Numsections, 0) as Numsections
+FROM students s
+LEFT OUTER JOIN
+    (SELECT s.studentid, COUNT(*) as NumSections
+    FROM registration r
+    INNER JOIN students s
+    ON s.studentid = r.studentid
+    GROUP BY s.studentid)t1
+ON t1.studentid = s.studentid
+WHERE state = 'WY'
+AND city = 'Rawlins'
+ORDER BY lastname, firstname;
+
+/*9*/
+SELECT DISTINCT firstname, lastname, phone
+FROM professors p
+INNER JOIN sections s
+ON s.professorid = p.professorid
+WHERE courseid = 10521
+ORDER BY lastname, firstname;
+
+/*10*/
+SELECT courseid, s.sectionid, building, room, numstudents
+from sections s
+INNER JOIN location l
+ON s.locationid = l.locationid
+INNER JOIN
+    (SELECT s.sectionid, COUNT(*) as numstudents
+    FROM sections s
+    INNER JOIN registration r
+    ON r.sectionid = s.sectionid
+    GROUP BY s.sectionid)t1
+ON t1.sectionid = s.sectionid
+WHERE courseid = 10521
+AND building = 'TE'
+ORDER BY numstudents desc, s.sectionid;
+
+/*11*/
+SELECT subjectcode, coursenumber, building, room, s.sectionid, numstudents
+FROM sections s
+INNER JOIN courses c
+ON c.courseid = s.courseid
+INNER JOIN location l
+ON l.locationid = s.locationid
+INNER JOIN
+    (SELECT s.sectionid, COUNT(*) as numstudents
+    FROM sections s
+    INNER JOIN registration r
+    ON r.sectionid = s.sectionid
+    GROUP BY s.sectionid)t1
+ON t1.sectionid = s.sectionid
+WHERE building = 'TE'
+AND room = '103C'
+AND numstudents >= 9
+ORDER BY numstudents desc, s.sectionid;
+
+/*12*/
+SELECT DISTINCT p.professorid, firstname, lastname, subjectcode, coursenumber, c.courseid
+FROM professors p
+INNER JOIN sections s
+ON s.professorid = p.professorid
+INNER JOIN courses c
+ON c.courseid = s.courseid
+WHERE c.courseid = 10521
+AND p.professorid NOT IN
+    (SELECT professorid
+    FROM
+        (SELECT p.professorID, courseid
+        FROM sections s
+        INNER JOIN professors p
+        ON p.professorid = s.professorid
+        WHERE courseid != 10521))
+ORDER BY lastname, firstname;

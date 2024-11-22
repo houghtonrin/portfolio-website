@@ -1,0 +1,215 @@
+set pagesize 5000
+
+/*1*/
+SELECT DISTINCT firstname, lastname, To_Char(admissiondate, 'Mon DD YYYY HH:MI AM') as dateadmitted, streetaddress, city, state, zip
+FROM students s
+INNER JOIN registration r
+ON r.studentid = s.studentid
+INNER JOIN assignmentscore a
+ON a.studentid = r.studentid
+AND a.sectionid = r.sectionid
+WHERE assignmenttypeid = 'QZ'
+AND assignmentnumber = 5
+AND admissiondate = 
+    (SELECT MAX(admissiondate)
+    FROM students s
+    INNER JOIN registration r
+    ON r.studentid = s.studentid
+    INNER JOIN assignmentscore a
+    ON a.studentid = r.studentid
+    AND a.sectionid = r.sectionid
+    WHERE assignmenttypeid = 'QZ'
+    AND assignmentnumber = 5)
+ORDER BY lastname, firstname;
+
+/*2*/
+SELECT Subjectdescription, subjectcode, coursenumber, capacity, sectionid
+FROM courses c
+INNER JOIN sections s 
+ON s.courseid = c.courseid
+WHERE sectionstartdate =
+    (SELECT MIN(sectionstartdate)
+    FROM sections s)
+ORDER BY subjectcode, coursenumber;
+
+/*3*/
+SELECT subjectDescription, subjectcode, coursenumber, SUM(capacity) as totalcapacity
+FROM sections s
+INNER JOIN courses c
+ON c.courseid = s.courseid
+WHERE subjectcode = 'WEB'
+GROUP BY subjectDescription, subjectcode, coursenumber
+HAVING SUM(capacity) >
+    (SELECT AVG(capacity)
+    FROM sections s
+    INNER JOIN courses c
+    ON c.courseid = s.courseid
+    WHERE subjectcode = 'WEB')
+ORDER BY totalcapacity desc, subjectcode, coursenumber DESC;
+
+/*4*/
+SELECT DISTINCT s.studentid, firstname, lastname, city, state, zip, COUNT(*) as numcsCourses
+FROM students s
+INNER JOIN registration r
+ON s.studentid = r.studentid
+INNER JOIN sections sec
+ON sec.sectionid = r.sectionid
+INNER JOIN courses c 
+ON c.courseid = sec.courseid
+WHERE subjectCode = 'NET'
+GROUP BY s.studentid, firstname, lastname, city, state, zip
+HAVING COUNT(*) =
+    (SELECT MAX(numcsCourses) 
+    FROM
+        (SELECT r.studentid, COUNT(*) as numcsCourses
+        FROM registration r
+        INNER JOIN sections sec
+        ON sec.sectionid = r.sectionid
+        INNER JOIN courses c 
+        ON c.courseid = sec.courseid
+        WHERE subjectCode = 'NET'
+        GROUP BY r.studentid))
+Order by s.studentid;
+
+/*5*/
+SELECT city, state, COUNT(*) as numProfessors
+FROM professors p
+INNER JOIN sections s
+ON s.professorid = p.professorid
+INNER JOIN courses c
+ON c.courseid = s.courseid
+WHERE subjectcode = 'CS'
+HAVING COUNT(*) =
+    (SELECT MAX(numProfessors) 
+    FROM
+        (SELECT COUNT(*) as numProfessors
+        FROM professors p
+        INNER JOIN sections s
+        ON s.professorid = p.professorid
+        INNER JOIN courses c
+        ON c.courseid = s.courseid
+        WHERE subjectcode = 'CS'
+        GROUP BY city))
+GROUP BY city, state
+ORDER BY city, state;
+
+/*6*/
+SELECT DISTINCT firstname, lastname, city, state, s.zip, numstudents
+FROM students s
+INNER JOIN registration r
+ON s.studentid = r.studentid
+INNER JOIN
+    (SELECT zip, count(*) as numstudents
+    FROM 
+        (SELECT DISTINCT zip, s.studentid
+        FROM students s
+        INNER JOIN registration r
+        ON s.studentid = r.studentid)
+    GROUP BY zip
+    HAVING COUNT(*) =
+        (SELECT MAX(numstudents)
+        FROM
+            (SELECT zip, COUNT(*) as numstudents
+            FROM
+                (SELECT DISTINCT zip, s.studentid
+                FROM students s
+                INNER JOIN registration r
+                ON s.studentid = r.studentid) 
+            GROUP BY zip)))t1
+ON t1.zip = s.zip
+ORDER BY firstname, lastname;
+
+/*7*/
+SELECT DISTINCT s.studentid, firstname, lastname, streetaddress, city, state, zip
+FROM students s
+INNER JOIN registration r
+ON r.studentid = s.studentid
+INNER JOIN sections sec
+ON sec.sectionid = r.sectionid
+INNER JOIN courses c
+ON c.courseid = sec.courseid
+WHERE subjectcode = 'WEB'
+AND s.studentid NOT IN
+    (SELECT s.studentid
+    FROM students s
+    INNER JOIN registration r
+    ON r.studentid = s.studentid
+    INNER JOIN sections sec
+    ON sec.sectionid = r.sectionid
+    INNER JOIN courses c
+    ON c.courseid = sec.courseid
+    WHERE subjectcode = 'NET'
+    OR subjectcode = 'CS')
+ORDER BY lastname, firstname;
+
+/*8*/
+SELECT DISTINCT firstname, lastname, subjectcode, coursenumber, numassignments
+FROM students s
+INNER JOIN registration r
+ON r.studentid = s.studentid
+INNER JOIN sections sec
+ON sec.sectionid = r.sectionid
+INNER JOIN courses c
+ON c.courseid = sec.courseid
+INNER JOIN
+    (SELECT r.sectionid, s.studentid, COUNT(*) as numassignments
+    FROM students s
+    INNER JOIN registration r
+    ON s.studentid = r.studentid
+    INNER JOIN assignmentscore a
+    ON r.studentid = a.studentid
+    AND r.sectionid = a.sectionid
+    WHERE score > 85
+    GROUP BY s.studentid, r.sectionid
+    HAVING COUNT(*) =
+        (SELECT MAX(numassignments)
+        FROM
+            (SELECT r.sectionid, s.studentid, COUNT(*) as numassignments
+            FROM students s
+            INNER JOIN registration r
+            ON s.studentid = r.studentid
+            INNER JOIN assignmentscore a
+            ON r.studentid = a.studentid
+            AND r.sectionid = a.sectionid
+            WHERE score > 85
+             GROUP BY s.studentid, r.sectionid)))t1
+ON t1.sectionid = sec.sectionid
+AND t1.studentid = s.studentid
+ORDER BY subjectcode, coursenumber, lastname, firstname;
+
+/*9*/
+SELECT s.sectionid, subjectcode, coursenumber, capacity, enrolled
+FROM
+    (SELECT COUNT(*) as enrolled, s.sectionid
+    FROM sections s
+    INNER JOIN registration r
+    ON r.sectionid = s.sectionid
+    GROUP BY s.sectionid)t1
+INNER JOIN sections s
+on t1.sectionid = s.sectionid
+INNER JOIN courses c
+ON c.courseid = s.courseid
+WHERE enrolled >= capacity
+ORDER BY capacity DESC, subjectcode, coursenumber;
+
+/*10*/
+SELECT DISTINCT firstname, lastname, city, state, zip, phone
+FROM students s
+INNER JOIN registration r
+ON r.studentid = s.studentid
+INNER JOIN sections sec
+ON sec.sectionid = r.sectionid
+INNER JOIN courses c
+ON c.courseid = sec.courseid
+WHERE subjectcode = 'CS'
+AND s.studentid IN 
+    (SELECT s.studentid
+    FROM students s
+    INNER JOIN registration r
+    ON r.studentid = s.studentid
+    INNER JOIN sections sec
+    ON sec.sectionid = r.sectionid
+    INNER JOIN courses c
+    ON c.courseid = sec.courseid
+    WHERE subjectcode IN ('CHNS','FRCH','GRMN','ITLN','JPNS','PTGS','SPAN'))
+ORDER BY state, city, lastname, firstname

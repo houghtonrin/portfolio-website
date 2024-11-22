@@ -1,0 +1,151 @@
+set pagesize 5000
+
+/*1*/
+SELECT firstname, lastname, To_Char(AdmissionDate, 'Mon DD YYYY HH:MI AM') as admitdate
+FROM students
+WHERE To_Char(admissiondate, 'Mon YYYY') = 'Aug 2020'
+AND tuitionbalance >= 
+	(SELECT AVG(tuitionbalance)
+	FROM students)
+ORDER BY lastname, firstname;
+
+/*2*/
+SELECT firstname, lastname, streetaddress, city, state, zip
+FROM students
+WHERE tuitionbalance =
+	(SELECT MAX(tuitionbalance)
+	from students)
+ORDER BY lastname, firstname;
+
+/*3*/
+SELECT firstname, lastname, streetaddress, city, state, zip
+FROM students
+WHERE admissiondate = 
+	(SELECT MIN(admissiondate)
+	FROM students)
+ORDER BY lastname, firstname;
+
+/*4*/
+SELECT r.studentID, firstname, lastname, COUNT(*) as NUMCOURSES
+FROM students s
+INNER JOIN registration r
+ON r.studentid = s.studentid
+INNER JOIN sections se
+ON se.sectionid = r.sectionid
+INNER JOIN courses c
+ON c.courseid = se.courseid
+WHERE subjectcode = 'CS'
+AND coursenumber = '1400'
+GROUP BY r.studentID, firstname, lastname
+HAVING COUNT(*) > 1
+ORDER BY lastname, firstname;
+
+/*5*/
+SELECT firstname, lastname, streetaddress, city, state, zip
+FROM Professors p
+WHERE state = 'CO'
+AND hiredate = 
+	(SELECT MIN(hiredate)
+	FROM professors
+	WHERE state = 'CO')
+ORDER BY lastname, firstname;
+
+/*6*/
+SELECT  DISTINCT firstname, lastname, streetaddress, city, state, zip, subjectcode, coursenumber
+FROM professors p
+INNER JOIN sections se
+ON se.professorid = p.professorid
+INNER JOIN courses c
+ON c.courseid = se.courseid
+WHERE subjectcode = 'WEB'
+AND hiredate =
+	(SELECT MAX(hiredate)
+	FROM professors p 
+	INNER JOIN sections s
+	ON s.professorid = p.professorid
+	INNER JOIN courses c
+	ON c.courseid = s.courseid
+	WHERE subjectcode = 'WEB')
+ORDER BY coursenumber, lastname, firstname;
+
+/*7*/
+SELECT DISTINCT firstname, lastname, se.courseid, subjectcode, coursenumber, To_Char(sectionStartDate, 'Mon DD YYYY HH:MI AM') as sectime
+FROM students s
+INNER JOIN registration r
+ON r.studentid = s.studentid
+INNER JOIN sections se
+ON se.sectionid = r.sectionid 
+INNER JOIN courses c
+ON c.courseid = se.courseid
+WHERE subjectcode = 'NET'
+AND c.courseid IN 
+	(SELECT c.courseid
+	FROM students s
+	INNER JOIN registration r
+	ON r.studentid = s.studentid
+	INNER JOIN sections se
+	ON se.sectionid = r.sectionid 
+	INNER JOIN courses c
+	ON c.courseid = se.courseid
+	WHERE To_Char(sectionstartdate, 'HH:MI AM') = '11:30 AM')
+ORDER BY lastname, firstname, courseid;
+
+/*8*/
+SELECT firstname, lastname, streetaddress, city, state, zip, assignmenttypeid as id
+FROM students s
+INNER JOIN registration r
+ON r.studentid = s.studentid
+INNER JOIN assignmentscore a
+ON a.sectionid = r.sectionid
+AND a.studentid = r.studentid
+WHERE assignmentnumber = 3
+AND assignmenttypeid = 'MT'
+AND score =
+	(SELECT MIN(score)	
+	FROM students s
+	INNER JOIN registration r
+	ON r.studentid = s.studentid
+	INNER JOIN assignmentscore a
+	ON a.sectionid = r.sectionid
+	WHERE assignmentnumber = 3
+	AND assignmenttypeid = 'MT')
+ORDER BY lastname, firstname;
+
+/*9*/
+SELECT firstname, lastname, streetaddress, city, state, zip, assignmenttypeid as ID, score
+FROM students s
+INNER JOIN registration r
+ON r.studentid = s.studentid
+INNER JOIN assignmentscore a
+ON a.sectionid = r.sectionid
+AND a.studentid = r.studentid
+WHERE r.sectionid = 22555
+AND assignmenttypeid = 'FI'
+AND score < 
+	(SELECT AVG(score)
+	FROM assignmentscore
+	WHERE sectionid = 22555
+	AND assignmenttypeid = 'FI')
+ORDER BY score DESC, lastname, firstname;
+
+/*10*/
+SELECT distinct p.professorid, firstname, lastname, To_Char(hiredate, 'Mon DD YYYY HH:MI AM') as datehired
+FROM professors p
+INNER JOIN sections s
+ON s.professorid = p.professorid
+INNER JOIN location l
+ON l.locationid = s.locationid
+INNER JOIN courses c
+ON c.courseid = s.courseid
+WHERE l.building != 'OL'
+AND subjectcode = 'CS'
+AND p.professorid NOT IN 
+	(SELECT p.professorid
+	FROM professors p
+	INNER JOIN sections s
+	ON p.professorid = s.professorid
+	INNER JOIN location l
+	ON l.locationid = s.locationid
+	WHERE l.building = 'OL'
+	AND subjectcode = 'CS')
+ORDER BY lastname, firstname;
