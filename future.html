@@ -4,39 +4,62 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Future</title>
+    <link rel="shortcut icon" href="images/RH.png" type="image/x-icon">
+    <link rel="stylesheet" href="professional.css">
+    <link rel="stylesheet" href="browserrest.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="script.js" defer></script>
 </head>
 <body>
     <header>
         <h1>Rin Houghton</h1>
-        <h2>Portfolio</h2>
     </header>
+    <div class="topnav">
+        <a href="future.html" class="active">My Future</a>
+        <!-- Navigation links (hidden by default) -->
+        <div id="myLinks">
+          <a href="index.html">About Me</a>
+          <a href="portfolio.html">Portfolio</a>
+          <a href="resume.html">Resume</a>
+          <a href="letterofrec.html">Letters of Recommendation</a>
+          <a href="https://www.linkedin.com/in/rin-houghton-3768462a8/" target="_blank">LinkedIn</a>
+        </div>
+        <!-- "Hamburger menu" / "Bar icon" to toggle the navigation links -->
+        <a href="javascript:void(0);" class="icon" onclick="myFunction()">
+            <i class="fa fa-bars"></i>
+          </a>
+    </div>
     <nav>
-        <a href="index.html">About Me</a>
+        <a href="index.html" >About Me</a>
         <a href="portfolio.html">Portfolio</a>
         <a href="resume.html">Resume</a>
-        <a href="future.html">My Future</a>
+        <a href="future.html" class="curPage">My Future</a>
         <a href="letterofrec.html">Letters of Recommendation</a>
+        <a href="https://www.linkedin.com/in/rin-houghton-3768462a8/" target="_blank">LinkedIn</a>
     </nav>
-    <div>
-        <h2>Short Term Goals</h2>
+    <div class="main">
+        <h2>Goals</h2>
+        <h3>Short Term Goals</h3>
         <ul>
             <li>Graduate from NUAMES as the Valedictorian</li>
             <li>Attend University at a Top 20 school</li>
             <li>Read 50 books in 2025</li>
         </ul>
-        <h2>Long Term Goals</h2>
+        <h3>Long Term Goals</h3>
         <ul>
             <li>Attend Law School</li>
             <li>Pass the New York State Bar Exam</li>
             <li>Become a Lawyer Specializing in Computer Science</li>
         </ul>
     </div>
-    <div>
+    <div class="main">
         <h2>Acceptance Letters</h2>
-        <p>Missouri S&T</p>
-        <img src="images/Missouri S&T Acceptance Letter WEb.png" alt="Missouri S&T Acceptance Letter">
-        <p>Weber State University</p>
-        <img src="images/WSU Acceptance Letter Web.png" alt="Weber State University Acceptance Letter">
+        <h3>Missouri S&T</h3>
+        <a href="images/Missouri S&T Acceptance Letter WEb.png" target="_blank" class="mobile">View Letter</a>
+        <img src="images/Missouri S&T Acceptance Letter WEb.png" alt="Missouri S&T Acceptance Letter" class="desktop">
+        <h3>Weber State University</h3>
+        <a href="images/WSU Acceptance Letter Web.png" target="_blank" class="mobile">View Letter</a>
+        <img src="images/WSU Acceptance Letter Web.png" alt="Weber State University Acceptance Letter" class="desktop">
     </div>
 </body>
 </html>
