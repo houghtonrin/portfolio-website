@@ -136,6 +136,14 @@ img{
         padding-right: 0.75em;
     }
 
+    nav a:hover{
+        text-decoration: underline;
+        color:#E6FFEA;
+        padding: .5em;
+        padding-left: 0.75em;
+        padding-right: 0.75em;
+    }
+
     .curPage{
         background-color: #3C6377;
     }
